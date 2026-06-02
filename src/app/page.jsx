@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "framer-motion";
 import { Loader2 } from "lucide-react";
@@ -14,6 +14,7 @@ import {
   Shimmer,
   MapSkeleton,
   RateSparklineSkeleton,
+  StatsSkeleton,
 } from "@/components/skeletons";
 
 const LiveNetworkMap = dynamic(() => import("@/app/components/Map"), {
@@ -86,11 +87,15 @@ export default function DashboardPage() {
 
       <main className="min-w-0 px-4 py-8 pl-16 sm:pl-20 md:px-8 lg:px-10 xl:px-12 md:pl-24 md:pr-8 md:py-16">
         <div className="max-w-6xl mx-auto space-y-12">
-          {/* System At-A-Glance Stats Section */}
-          <SystemStats />
+          {/* System At-A-Glance Stats Section + Modular Stats Cards — isolated in a
+              single Suspense slot so intensive telemetry resolution never blocks
+              the header, nav, or sibling layout regions. */}
+          <Suspense fallback={<StatsSkeleton />}>
+            {/* System At-A-Glance Stats Section */}
+            <SystemStats />
 
-          {/* Modular Stats Cards Section */}
-          <section className="min-w-0 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Modular Stats Cards Section */}
+            <section className="min-w-0 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <div className="aspect-[16/10]">
               <ModularStatsCard
                 label="Network Throughput"
@@ -119,6 +124,7 @@ export default function DashboardPage() {
               />
             </div>
           </section>
+          </Suspense>
 
           {/* Local FX rates with memoized sparklines */}
           <section className="min-w-0 grid grid-cols-1 sm:grid-cols-3 gap-6">
